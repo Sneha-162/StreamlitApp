@@ -1,0 +1,10 @@
+cartooner
+rembg
+onnxruntime
+Pillow
+streamlit
+numba
+numpy
+opencv-python-headless==4.5.3.56
+
+
