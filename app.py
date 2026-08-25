@@ -718,10 +718,260 @@ else:
 # FOOTER
 # ---------------------------------------------------------
 
-st.markdown("""
-<div class="footer">
-    Made with <span>🌸</span> and a little bit of AI magic
-    <br>
-    Toonify AI · Image Art Studio
+st.html("""
+<style>
+
+.stApp {
+    background:
+        radial-gradient(circle at 15% 15%, rgba(255, 126, 210, 0.18), transparent 28%),
+        radial-gradient(circle at 85% 20%, rgba(120, 150, 255, 0.20), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(170, 90, 255, 0.16), transparent 35%),
+        linear-gradient(135deg, #090b22 0%, #101337 45%, #17102f 100%);
+}
+
+/* Hide Streamlit chrome */
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    visibility: hidden;
+}
+
+/* Animated background */
+.anime-bg {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Moon */
+.moon {
+    position: absolute;
+    width: 170px;
+    height: 170px;
+    right: 7%;
+    top: 8%;
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle at 35% 35%,
+        #ffffff 0%,
+        #eee8ff 35%,
+        #c9c2ff 65%,
+        rgba(180,160,255,0.15) 100%
+    );
+
+    box-shadow:
+        0 0 35px rgba(220,210,255,0.55),
+        0 0 100px rgba(160,130,255,0.25);
+
+    opacity: 0.7;
+
+    animation: moonFloat 7s ease-in-out infinite;
+}
+
+@keyframes moonFloat {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(14px);
+    }
+}
+
+/* Stars */
+.star {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 10px rgba(255,255,255,0.9);
+
+    animation: twinkle 2.5s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+
+    0%,100% {
+        opacity: 0.2;
+        transform: scale(0.7);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.4);
+    }
+}
+
+/* Sakura petals */
+.petal {
+    position: absolute;
+
+    width: 15px;
+    height: 10px;
+
+    background: linear-gradient(
+        135deg,
+        #ffd7ef,
+        #ff8fcb
+    );
+
+    border-radius: 100% 0 100% 0;
+
+    opacity: 0.75;
+
+    filter:
+        drop-shadow(
+            0 0 5px rgba(255,145,210,0.45)
+        );
+
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+
+    0% {
+        transform:
+            translate3d(0,-12vh,0)
+            rotate(0deg);
+
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.8;
+    }
+
+    50% {
+        transform:
+            translate3d(100px,50vh,0)
+            rotate(180deg);
+    }
+
+    100% {
+        transform:
+            translate3d(-120px,115vh,0)
+            rotate(360deg);
+
+        opacity: 0;
+    }
+}
+
+/* Petal timing */
+
+.p1 {
+    left: 5%;
+    animation-duration: 12s;
+    animation-delay: -3s;
+}
+
+.p2 {
+    left: 15%;
+    animation-duration: 15s;
+    animation-delay: -8s;
+}
+
+.p3 {
+    left: 28%;
+    animation-duration: 11s;
+    animation-delay: -4s;
+}
+
+.p4 {
+    left: 40%;
+    animation-duration: 17s;
+    animation-delay: -12s;
+}
+
+.p5 {
+    left: 52%;
+    animation-duration: 13s;
+    animation-delay: -5s;
+}
+
+.p6 {
+    left: 64%;
+    animation-duration: 16s;
+    animation-delay: -10s;
+}
+
+.p7 {
+    left: 76%;
+    animation-duration: 12s;
+    animation-delay: -2s;
+}
+
+.p8 {
+    left: 90%;
+    animation-duration: 18s;
+    animation-delay: -7s;
+}
+
+/* Make actual Streamlit content stay above background */
+
+[data-testid="stAppViewContainer"] {
+    position: relative;
+    z-index: 1;
+}
+
+</style>
+
+<div class="anime-bg">
+
+    <div class="moon"></div>
+
+    <div class="star"
+         style="left:8%;top:18%;">
+    </div>
+
+    <div class="star"
+         style="left:18%;top:31%;animation-delay:.7s;">
+    </div>
+
+    <div class="star"
+         style="left:31%;top:13%;animation-delay:1.4s;">
+    </div>
+
+    <div class="star"
+         style="left:46%;top:24%;animation-delay:.3s;">
+    </div>
+
+    <div class="star"
+         style="left:58%;top:12%;animation-delay:1.1s;">
+    </div>
+
+    <div class="star"
+         style="left:70%;top:34%;animation-delay:1.8s;">
+    </div>
+
+    <div class="star"
+         style="left:82%;top:22%;animation-delay:.5s;">
+    </div>
+
+    <div class="star"
+         style="left:94%;top:42%;animation-delay:1.5s;">
+    </div>
+
+
+    <div class="petal p1"></div>
+    <div class="petal p2"></div>
+    <div class="petal p3"></div>
+    <div class="petal p4"></div>
+    <div class="petal p5"></div>
+    <div class="petal p6"></div>
+    <div class="petal p7"></div>
+    <div class="petal p8"></div>
+
 </div>
-""", unsafe_allow_html=True)
+""")
