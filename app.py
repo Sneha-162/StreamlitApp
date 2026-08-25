@@ -2,10 +2,37 @@ import streamlit as st
 from io import BytesIO
 from PIL import Image
 from rembg import remove
-from cartooner import cartoonize
 import cv2
 import numpy as np
+def cartoonize_image(img):
+    """
+    OpenCV-based cartoon effect.
+    No external cartooner package required.
+    """
 
+    # Reduce image noise while preserving edges
+    color = cv2.bilateralFilter(img, 9, 150, 150)
+
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+    # Smooth grayscale image
+    gray = cv2.medianBlur(gray, 7)
+
+    # Detect strong edges
+    edges = cv2.adaptiveThreshold(
+        gray,
+        255,
+        cv2.ADAPTIVE_THRESH_MEAN_C,
+        cv2.THRESH_BINARY,
+        9,
+        2
+    )
+
+    # Combine smooth colors with edges
+    cartoon = cv2.bitwise_and(color, color, mask=edges)
+
+    return cartoon
 # =========================================================
 # PAGE CONFIG
 # =========================================================
@@ -546,8 +573,8 @@ def process_image(uploaded_image, threshold, alpha_matting, cartoon_style):
         img_cv = np.array(image)
 
         # Cartoonization
-        if cartoon_style == "Default":
-            cartoon = cartoonize(img_cv)
+       if cartoon_style == "Default":
+           cartoon = cartoonize_image(img_cv)
 
         elif cartoon_style == "Pencil Sketch":
             gray, sketch = cv2.pencilSketch(
