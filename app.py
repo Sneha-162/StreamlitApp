@@ -82,7 +82,6 @@ def process_image(uploaded_image, threshold, alpha_matting, cartoon_style):
 if my_upload:
     process_image(my_upload, threshold, alpha_matting, cartoon_style)
 else:
-    # Load default image correctly
-    default_image = "shutterstock_1080525158-2.webp"
+    st.info("👆 Please upload an image to get started.")
     with open(default_image, "rb") as img_file:
         process_image(BytesIO(img_file.read()), threshold, alpha_matting, cartoon_style)
