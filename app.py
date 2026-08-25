@@ -6,9 +6,7 @@ from cartooner import cartoonize
 import cv2
 import numpy as np
 
-# =========================================================
-# PAGE CONFIG
-# =========================================================
+# Page Config
 st.set_page_config(
     page_title="Toonify AI",
     page_icon="🌸",
@@ -53,7 +51,7 @@ footer {
 
 /* ---------- ANIMATED BACKGROUND ---------- */
 .anime-bg {
-    position: fixed;
+    position: background_removed;
     inset: 0;
     overflow: hidden;
     pointer-events: none;
@@ -420,9 +418,7 @@ footer {
 </div>
 """)
 
-# =========================================================
-# HEADER
-# =========================================================
+# Header
 st.html("""
 <div class="topbar">
     <div class="brand">
@@ -432,9 +428,7 @@ st.html("""
 </div>
 """)
 
-# =========================================================
-# HERO
-# =========================================================
+# Hero
 st.html("""
 <div class="hero">
     <div class="hero-badge">
@@ -451,9 +445,7 @@ st.html("""
 </div>
 """)
 
-# =========================================================
-# UPLOAD CARD
-# =========================================================
+# Upload Card
 st.html("""
 <div class="upload-card">
     <div class="upload-title">
@@ -466,15 +458,13 @@ st.html("""
 </div>
 """)
 
-my_upload = st.file_uploader(
+uploaded_file = st.file_uploader(
     "Upload an image",
     type=["jpg", "jpeg", "png"],
     label_visibility="collapsed"
 )
 
-# =========================================================
-# CUSTOMIZATION
-# =========================================================
+# Controls
 st.html("""
 <div class="section-title">
     ✨ Customize your creation
@@ -485,15 +475,15 @@ st.html("""
 </div>
 """)
 
-control_col1, control_col2, control_col3 = st.columns(3)
+bg_col, threshold_col, style_col = st.columns(3)
 
-with control_col1:
+with bg_col:
     alpha_matting = st.checkbox(
         "✨ Remove background",
         value=True
     )
 
-with control_col2:
+with threshold_col:
     threshold = st.slider(
         "Background threshold",
         0,
@@ -502,7 +492,7 @@ with control_col2:
         step=5
     )
 
-with control_col3:
+with style_col:
     cartoon_style = st.selectbox(
         "🎨 Art style",
         [
@@ -513,66 +503,59 @@ with control_col3:
         ]
     )
 
-# =========================================================
-# HELPERS
-# =========================================================
-def convert_images(img):
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    return buf.getvalue()
+# Helpers
+def image_to_bytes(image):
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    return buffer.getvalue()
 
 
-# =========================================================
-# IMAGE PROCESSING
-# =========================================================
-def process_image(uploaded_image, threshold, alpha_matting, cartoon_style):
+# Image processing
+def process_image(uploaded_file, threshold, remove_background, style):
 
-    if uploaded_image is None:
+    if uploaded_file is None:
         st.warning("Please upload an image first.")
         return
 
-    image = Image.open(uploaded_image).convert("RGB")
+    image = Image.open(uploaded_file).convert("RGB")
 
     with st.spinner("✨ Creating your artwork... this may take a moment."):
 
-        # Background removal
-        fixed = remove(
+        background_removed = remove(
             image,
-            alpha_matting=alpha_matting,
+            alpha_matting=remove_background,
             alpha_matting_background_threshold=threshold
         )
 
-        # OpenCV input
-        img_cv = np.array(image)
+        cv_image = np.array(image)
 
-        # Cartoonization
-        if cartoon_style == "Default":
-            cartoon = cartoonize(img_cv)
+        if style == "Default":
+            cartoon = cartoonize(cv_image)
 
-        elif cartoon_style == "Pencil Sketch":
+        elif style == "Pencil Sketch":
             gray, sketch = cv2.pencilSketch(
-                img_cv,
+                cv_image,
                 sigma_s=60,
                 sigma_r=0.07,
                 shade_factor=0.05
             )
             cartoon = sketch
 
-        elif cartoon_style == "Watercolor":
+        elif style == "Watercolor":
             cartoon = cv2.stylization(
-                img_cv,
+                cv_image,
                 sigma_s=60,
                 sigma_r=0.6
             )
 
-        elif cartoon_style == "Oil Paint":
+        elif style == "Oil Paint":
             cartoon = cv2.stylization(
-                img_cv,
+                cv_image,
                 sigma_s=150,
                 sigma_r=0.25
             )
 
-    cartoon_pil = Image.fromarray(cartoon)
+    artwork_image = Image.fromarray(cartoon)
 
     # =====================================================
     # SUCCESS
@@ -610,7 +593,7 @@ def process_image(uploaded_image, threshold, alpha_matting, cartoon_style):
 
         st.download_button(
             "⬇️ Download Original",
-            data=convert_images(image),
+            data=image_to_bytes(image),
             file_name="original_image.png",
             mime="image/png"
         )
@@ -625,13 +608,13 @@ def process_image(uploaded_image, threshold, alpha_matting, cartoon_style):
         """)
 
         st.image(
-            cartoon_pil,
+            artwork_image,
             use_container_width=True
         )
 
         st.download_button(
             "✨ Download Artwork",
-            data=convert_images(cartoon_pil),
+            data=image_to_bytes(artwork_image),
             file_name="toonify_artwork.png",
             mime="image/png"
         )
@@ -646,25 +629,23 @@ def process_image(uploaded_image, threshold, alpha_matting, cartoon_style):
     """)
 
     st.image(
-        fixed,
+        background_removed,
         use_container_width=True
     )
 
     st.download_button(
         "🌸 Download Background Removed Image",
-        data=convert_images(fixed),
+        data=image_to_bytes(background_removed),
         file_name="background_removed.png",
         mime="image/png"
     )
 
 
-# =========================================================
-# RUN APP
-# =========================================================
-if my_upload:
+# Run the app
+if uploaded_file:
 
     process_image(
-        my_upload,
+        uploaded_file,
         threshold,
         alpha_matting,
         cartoon_style
@@ -685,9 +666,7 @@ else:
     </div>
     """)
 
-# =========================================================
-# FOOTER
-# =========================================================
+# Footer
 st.html("""
 <div class="footer">
     Made with <span>🌸</span> and a little bit of AI magic
