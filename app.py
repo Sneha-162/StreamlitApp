@@ -679,7 +679,7 @@ def process_image(
 
     with st.spinner("✨ Creating your artwork... this may take a moment."):
         # Background removal
-       background_removed = original_image.copy()
+        background_removed = original_image.copy()
 
         # Resize very large phone images before sending them
         # to the AI API. This reduces upload size and memory usage.
