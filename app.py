@@ -2,11 +2,15 @@ import streamlit as st
 from io import BytesIO
 from PIL import Image
 from rembg import remove
-from cartooner import cartoonize
+from huggingface_hub import InferenceClient
 import cv2
 import numpy as np
 
-# Page Config
+
+# =========================================================
+# PAGE CONFIG
+# =========================================================
+
 st.set_page_config(
     page_title="Toonify AI",
     page_icon="🌸",
@@ -14,13 +18,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+
 # =========================================================
 # CUSTOM CSS + ANIMATED BACKGROUND
-# Everything in this block is rendered with st.html()
 # =========================================================
-st.html("""
+
+st.html(
+    """
 <style>
-/* ---------- APP BACKGROUND ---------- */
 .stApp {
     background:
         radial-gradient(circle at 15% 15%, rgba(255, 126, 210, 0.18), transparent 28%),
@@ -30,7 +35,6 @@ st.html("""
     color: #f7f5ff;
 }
 
-/* ---------- HIDE STREAMLIT CHROME ---------- */
 #MainMenu {
     visibility: hidden;
 }
@@ -43,22 +47,19 @@ footer {
     visibility: hidden;
 }
 
-/* ---------- KEEP APP CONTENT ABOVE BACKGROUND ---------- */
 [data-testid="stAppViewContainer"] {
     position: relative;
     z-index: 1;
 }
 
-/* ---------- ANIMATED BACKGROUND ---------- */
 .anime-bg {
-    position: background_removed;
+    position: fixed;
     inset: 0;
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
 }
 
-/* ---------- MOON ---------- */
 .moon {
     position: absolute;
     width: 170px;
@@ -85,12 +86,12 @@ footer {
     0%, 100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(14px);
     }
 }
 
-/* ---------- STARS ---------- */
 .star {
     position: absolute;
     width: 4px;
@@ -106,13 +107,13 @@ footer {
         opacity: 0.2;
         transform: scale(0.7);
     }
+
     50% {
         opacity: 1;
         transform: scale(1.4);
     }
 }
 
-/* ---------- SAKURA PETALS ---------- */
 .petal {
     position: absolute;
     width: 15px;
@@ -129,28 +130,69 @@ footer {
         transform: translate3d(0, -12vh, 0) rotate(0deg);
         opacity: 0;
     }
+
     10% {
         opacity: 0.8;
     }
+
     50% {
         transform: translate3d(100px, 50vh, 0) rotate(180deg);
     }
+
     100% {
         transform: translate3d(-120px, 115vh, 0) rotate(360deg);
         opacity: 0;
     }
 }
 
-.p1 { left: 5%;  animation-duration: 12s; animation-delay: -3s; }
-.p2 { left: 15%; animation-duration: 15s; animation-delay: -8s; }
-.p3 { left: 28%; animation-duration: 11s; animation-delay: -4s; }
-.p4 { left: 40%; animation-duration: 17s; animation-delay: -12s; }
-.p5 { left: 52%; animation-duration: 13s; animation-delay: -5s; }
-.p6 { left: 64%; animation-duration: 16s; animation-delay: -10s; }
-.p7 { left: 76%; animation-duration: 12s; animation-delay: -2s; }
-.p8 { left: 90%; animation-duration: 18s; animation-delay: -7s; }
+.p1 {
+    left: 5%;
+    animation-duration: 12s;
+    animation-delay: -3s;
+}
 
-/* ---------- TOP NAV ---------- */
+.p2 {
+    left: 15%;
+    animation-duration: 15s;
+    animation-delay: -8s;
+}
+
+.p3 {
+    left: 28%;
+    animation-duration: 11s;
+    animation-delay: -4s;
+}
+
+.p4 {
+    left: 40%;
+    animation-duration: 17s;
+    animation-delay: -12s;
+}
+
+.p5 {
+    left: 52%;
+    animation-duration: 13s;
+    animation-delay: -5s;
+}
+
+.p6 {
+    left: 64%;
+    animation-duration: 16s;
+    animation-delay: -10s;
+}
+
+.p7 {
+    left: 76%;
+    animation-duration: 12s;
+    animation-delay: -2s;
+}
+
+.p8 {
+    left: 90%;
+    animation-duration: 18s;
+    animation-delay: -7s;
+}
+
 .topbar {
     display: flex;
     justify-content: space-between;
@@ -174,7 +216,6 @@ footer {
     margin-left: 8px;
 }
 
-/* ---------- HERO ---------- */
 .hero {
     text-align: center;
     padding: 25px 15px 28px 15px;
@@ -215,7 +256,6 @@ footer {
     line-height: 1.7;
 }
 
-/* ---------- CARDS ---------- */
 .upload-card,
 .control-card {
     max-width: 900px;
@@ -224,10 +264,10 @@ footer {
     padding: 28px;
     border-radius: 26px;
     background: rgba(20, 21, 55, 0.68);
-    border: 1px solid rgba(255,255,255,0.10);
+    border: 1px solid rgba(255, 255, 255, 0.10);
     box-shadow:
-        0 25px 80px rgba(0,0,0,0.30),
-        inset 0 1px 0 rgba(255,255,255,0.06);
+        0 25px 80px rgba(0, 0, 0, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(18px);
 }
 
@@ -244,7 +284,6 @@ footer {
     margin-top: 5px;
 }
 
-/* ---------- SECTION HEADINGS ---------- */
 .section-title {
     font-size: 1.35rem;
     font-weight: 800;
@@ -257,12 +296,11 @@ footer {
     margin-bottom: 18px;
 }
 
-/* ---------- BUTTONS ---------- */
 .stButton > button {
     width: 100%;
     min-height: 48px;
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.10);
+    border: 1px solid rgba(255, 255, 255, 0.10);
     background: linear-gradient(135deg, #ff73c6, #a783ff);
     color: white;
     font-weight: 800;
@@ -274,26 +312,24 @@ footer {
 .stButton > button:hover {
     transform: translateY(-2px);
     box-shadow: 0 14px 38px rgba(210, 105, 220, 0.38);
-    border-color: rgba(255,255,255,0.25);
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* ---------- DOWNLOAD BUTTONS ---------- */
 .stDownloadButton > button {
     width: 100%;
     min-height: 46px;
     border-radius: 13px;
-    background: rgba(255,255,255,0.07);
+    background: rgba(255, 255, 255, 0.07);
     color: #f5f3ff;
-    border: 1px solid rgba(255,255,255,0.12);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     font-weight: 700;
 }
 
 .stDownloadButton > button:hover {
-    background: rgba(255,255,255,0.12);
-    border-color: rgba(255,170,225,0.35);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 170, 225, 0.35);
 }
 
-/* ---------- UPLOADER ---------- */
 [data-testid="stFileUploader"] {
     max-width: 900px;
     margin: 0 auto;
@@ -311,13 +347,12 @@ footer {
     background: rgba(30, 26, 67, 0.72);
 }
 
-/* ---------- IMAGE RESULTS ---------- */
 .image-card {
     padding: 12px;
     border-radius: 22px;
     background: rgba(14, 15, 42, 0.70);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 15px 45px rgba(0,0,0,0.22);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.22);
 }
 
 .image-label {
@@ -327,7 +362,6 @@ footer {
     color: #eeeeff;
 }
 
-/* ---------- SUCCESS ---------- */
 .success-card {
     text-align: center;
     padding: 15px;
@@ -338,7 +372,6 @@ footer {
     color: #9ef0c9;
 }
 
-/* ---------- EMPTY STATE ---------- */
 .empty-state {
     text-align: center;
     margin: 30px auto;
@@ -356,7 +389,6 @@ footer {
     color: #aaa9c8;
 }
 
-/* ---------- FOOTER ---------- */
 .footer {
     text-align: center;
     padding: 45px 0 20px 0;
@@ -368,7 +400,6 @@ footer {
     color: #ff9ed8;
 }
 
-/* ---------- MOBILE ---------- */
 @media (max-width: 700px) {
     .moon {
         width: 100px;
@@ -394,7 +425,6 @@ footer {
 </style>
 
 <div class="anime-bg">
-
     <div class="moon"></div>
 
     <div class="star" style="left:8%;top:18%;"></div>
@@ -414,22 +444,33 @@ footer {
     <div class="petal p6"></div>
     <div class="petal p7"></div>
     <div class="petal p8"></div>
-
 </div>
-""")
+"""
+)
 
-# Header
-st.html("""
+
+# =========================================================
+# HEADER
+# =========================================================
+
+st.html(
+    """
 <div class="topbar">
     <div class="brand">
         🌸 Toonify<span>AI</span>
         <span class="brand-small">Image Art Studio</span>
     </div>
 </div>
-""")
+"""
+)
 
-# Hero
-st.html("""
+
+# =========================================================
+# HERO
+# =========================================================
+
+st.html(
+    """
 <div class="hero">
     <div class="hero-badge">
         ✨ AI-powered image transformation
@@ -443,10 +484,16 @@ st.html("""
         styles — all in a few clicks.
     </p>
 </div>
-""")
+"""
+)
 
-# Upload Card
-st.html("""
+
+# =========================================================
+# UPLOAD CARD
+# =========================================================
+
+st.html(
+    """
 <div class="upload-card">
     <div class="upload-title">
         🖼️ Start with an image
@@ -456,16 +503,22 @@ st.html("""
         Upload a JPG or PNG and let the magic begin ✨
     </div>
 </div>
-""")
-
-uploaded_file = st.file_uploader(
-    "Upload an image",
-    type=["jpg", "jpeg", "png"],
-    label_visibility="collapsed"
+"""
 )
 
-# Controls
-st.html("""
+uploaded_image = st.file_uploader(
+    "Upload an image",
+    type=["jpg", "jpeg", "png"],
+    label_visibility="collapsed",
+)
+
+
+# =========================================================
+# CUSTOMIZATION
+# =========================================================
+
+st.html(
+    """
 <div class="section-title">
     ✨ Customize your creation
 </div>
@@ -473,204 +526,317 @@ st.html("""
 <div class="section-subtitle">
     Choose how you want your artwork to look.
 </div>
-""")
+"""
+)
 
-bg_col, threshold_col, style_col = st.columns(3)
+control_col1, control_col2, control_col3 = st.columns(3)
 
-with bg_col:
+with control_col1:
     alpha_matting = st.checkbox(
         "✨ Remove background",
-        value=True
+        value=True,
     )
 
-with threshold_col:
+with control_col2:
     threshold = st.slider(
         "Background threshold",
-        0,
-        100,
+        min_value=0,
+        max_value=100,
         value=50,
-        step=5
+        step=5,
     )
 
-with style_col:
+with control_col3:
     cartoon_style = st.selectbox(
-        "🎨 Art style",
+        "🎨 AI Art style",
         [
-            "Default",
-            "Pencil Sketch",
+            "Anime Cartoon",
             "Watercolor",
-            "Oil Paint"
-        ]
+            "Manga",
+            "Digital Art",
+            "Classic Cartoon",
+        ],
     )
 
-# Helpers
-def image_to_bytes(image):
+
+# =========================================================
+# HELPER FUNCTIONS
+# =========================================================
+
+def convert_image_to_bytes(image):
+    """Convert a PIL image to PNG bytes."""
     buffer = BytesIO()
     image.save(buffer, format="PNG")
     return buffer.getvalue()
 
 
-# Image processing
-def process_image(uploaded_file, threshold, remove_background, style):
+# =========================================================
+# HUGGING FACE AI ART GENERATION
+# =========================================================
 
-    if uploaded_file is None:
-        st.warning("Please upload an image first.")
-        return
+STYLE_PROMPTS = {
+    "Anime Cartoon": """
+Transform this photograph into a polished anime-inspired
+cartoon illustration.
 
-    image = Image.open(uploaded_file).convert("RGB")
+Preserve the person's identity, facial features, pose,
+clothing, proportions and overall composition.
+
+Use clean expressive outlines, soft vibrant colors,
+subtle shading and a professional digital-art finish.
+
+Do not add extra people or objects.
+Do not change the person's identity.
+""",
+
+    "Watercolor": """
+Transform this photograph into a beautiful watercolor
+illustration.
+
+Preserve the person's identity, facial features, pose,
+clothing, proportions and overall composition.
+
+Use soft watercolor pigments, delicate brush textures,
+natural colors and elegant painted edges.
+
+Do not add extra people or objects.
+""",
+
+    "Manga": """
+Transform this photograph into a polished manga-style
+illustration.
+
+Preserve the person's identity, facial features, pose,
+clothing, proportions and overall composition.
+
+Use clean expressive ink lines, manga-style shading,
+detailed illustrated features and controlled highlights.
+
+Do not add extra people or objects.
+""",
+
+    "Digital Art": """
+Transform this photograph into polished professional
+digital artwork.
+
+Preserve the person's identity, facial features, pose,
+clothing, proportions and overall composition.
+
+Use clean refined edges, beautiful colors, subtle
+cinematic lighting and high-quality digital illustration.
+
+Do not add extra people or objects.
+""",
+
+    "Classic Cartoon": """
+Transform this photograph into a colorful cartoon
+illustration.
+
+Preserve the person's identity, facial features, pose,
+clothing, proportions and overall composition.
+
+Use bold clean outlines, smooth colors, playful shading
+and a friendly animated finish.
+
+Do not add extra people or objects.
+"""
+}
+
+
+def generate_ai_art(image, selected_style):
+    """
+    Send the image to Hugging Face and generate the
+    selected artistic style using FLUX.2-klein-9B.
+    """
+
+    client = InferenceClient(
+        provider="auto",
+        api_key=st.secrets["HF_TOKEN"]
+    )
+
+    result = client.image_to_image(
+        image=image,
+        prompt=STYLE_PROMPTS[selected_style],
+        model="black-forest-labs/FLUX.2-klein-9B"
+    )
+
+    return result
+
+
+# =========================================================
+# IMAGE PROCESSING
+# =========================================================
+
+def process_image(
+    uploaded_file,
+    background_threshold,
+    remove_background,
+    selected_style,
+):
+    """Process and display the uploaded image."""
+
+    original_image = Image.open(uploaded_file).convert("RGB")
 
     with st.spinner("✨ Creating your artwork... this may take a moment."):
+        # Background removal
+        if remove_background:
+            background_removed = remove(
+                original_image,
+                alpha_matting=True,
+                alpha_matting_background_threshold=background_threshold,
+            )
+        else:
+            background_removed = original_image.copy()
 
-        background_removed = remove(
-            image,
-            alpha_matting=remove_background,
-            alpha_matting_background_threshold=threshold
+        # Resize very large phone images before sending them
+        # to the AI API. This reduces upload size and memory usage.
+        ai_image = original_image.copy()
+        ai_image.thumbnail(
+            (1600, 1600),
+            Image.Resampling.LANCZOS,
         )
 
-        cv_image = np.array(image)
-
-        if style == "Default":
-            cartoon = cartoonize(cv_image)
-
-        elif style == "Pencil Sketch":
-            gray, sketch = cv2.pencilSketch(
-                cv_image,
-                sigma_s=60,
-                sigma_r=0.07,
-                shade_factor=0.05
-            )
-            cartoon = sketch
-
-        elif style == "Watercolor":
-            cartoon = cv2.stylization(
-                cv_image,
-                sigma_s=60,
-                sigma_r=0.6
-            )
-
-        elif style == "Oil Paint":
-            cartoon = cv2.stylization(
-                cv_image,
-                sigma_s=150,
-                sigma_r=0.25
-            )
-
-    artwork_image = Image.fromarray(cartoon)
+        # Generate artwork using Hugging Face
+        artwork_image = generate_ai_art(
+            ai_image,
+            selected_style,
+        )
 
     # =====================================================
-    # SUCCESS
+    # SUCCESS MESSAGE
     # =====================================================
-    st.html("""
-    <div class="success-card">
-        ✨ Your artwork is ready!
-    </div>
-    """)
+
+    st.html(
+        """
+<div class="success-card">
+    ✨ Your artwork is ready!
+</div>
+"""
+    )
 
     # =====================================================
     # RESULTS
     # =====================================================
-    st.html("""
-    <div class="section-title">
-        🖼️ Your results
+
+    st.html(
+        """
+<div class="section-title">
+    🖼️ Your results
+</div>
+"""
+    )
+
+    result_col1, result_col2 = st.columns(2)
+
+    with result_col1:
+        st.html(
+            """
+<div class="image-card">
+    <div class="image-label">
+        📸 Original
     </div>
-    """)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.html("""
-        <div class="image-card">
-            <div class="image-label">
-                📸 Original
-            </div>
-        </div>
-        """)
+</div>
+"""
+        )
 
         st.image(
-            image,
-            use_container_width=True
+            original_image,
+            use_container_width=True,
         )
 
         st.download_button(
-            "⬇️ Download Original",
-            data=image_to_bytes(image),
+            label="⬇️ Download Original",
+            data=convert_image_to_bytes(original_image),
             file_name="original_image.png",
-            mime="image/png"
+            mime="image/png",
         )
 
-    with col2:
-        st.html("""
-        <div class="image-card">
-            <div class="image-label">
-                🎨 Cartoonized
-            </div>
-        </div>
-        """)
+    with result_col2:
+        st.html(
+            """
+<div class="image-card">
+    <div class="image-label">
+        🎨 Cartoonized
+    </div>
+</div>
+"""
+        )
 
         st.image(
             artwork_image,
-            use_container_width=True
+            use_container_width=True,
         )
 
         st.download_button(
-            "✨ Download Artwork",
-            data=image_to_bytes(artwork_image),
+            label="✨ Download Artwork",
+            data=convert_image_to_bytes(artwork_image),
             file_name="toonify_artwork.png",
-            mime="image/png"
+            mime="image/png",
         )
 
     # =====================================================
-    # BACKGROUND REMOVED
+    # BACKGROUND-REMOVED RESULT
     # =====================================================
-    st.html("""
-    <div class="section-title">
-        ✨ Background removed
-    </div>
-    """)
+
+    st.html(
+        """
+<div class="section-title">
+    ✨ Background removed
+</div>
+"""
+    )
 
     st.image(
         background_removed,
-        use_container_width=True
+        use_container_width=True,
     )
 
     st.download_button(
-        "🌸 Download Background Removed Image",
-        data=image_to_bytes(background_removed),
+        label="🌸 Download Background Removed Image",
+        data=convert_image_to_bytes(background_removed),
         file_name="background_removed.png",
-        mime="image/png"
+        mime="image/png",
     )
 
 
-# Run the app
-if uploaded_file:
+# =========================================================
+# RUN APP
+# =========================================================
 
+if uploaded_image is not None:
     process_image(
-        uploaded_file,
-        threshold,
-        alpha_matting,
-        cartoon_style
+        uploaded_file=uploaded_image,
+        background_threshold=threshold,
+        remove_background=alpha_matting,
+        selected_style=cartoon_style,
+    )
+else:
+    st.html(
+        """
+<div class="empty-state">
+    <div class="empty-icons">
+        🌸 ✨ 🌙
+    </div>
+
+    <div class="empty-text">
+        Your canvas is waiting.
+        Upload a photo above to begin.
+    </div>
+</div>
+"""
     )
 
-else:
 
-    st.html("""
-    <div class="empty-state">
-        <div class="empty-icons">
-            🌸 ✨ 🌙
-        </div>
+# =========================================================
+# FOOTER
+# =========================================================
 
-        <div class="empty-text">
-            Your canvas is waiting.
-            Upload a photo above to begin.
-        </div>
-    </div>
-    """)
-
-# Footer
-st.html("""
+st.html(
+    """
 <div class="footer">
     Made with <span>🌸</span> and a little bit of AI magic
     <br>
     Toonify AI · Image Art Studio
 </div>
-""")
+"""
+)
