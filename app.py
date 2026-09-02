@@ -1,10 +1,9 @@
-import streamlit as st
-from io import BytesIO
-from PIL import Image
 import base64
 import html
-
-
+from io import BytesIO
+from PIL import Image
+import streamlit as st
+import streamlit.components.v1 as components
 
 # =========================================================
 # PAGE CONFIG
@@ -16,7 +15,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-
 
 # =========================================================
 # CUSTOM CSS + ANIMATED BACKGROUND
@@ -329,7 +327,6 @@ st.html(
 """
 )
 
-
 # =========================================================
 # HEADER
 # =========================================================
@@ -344,7 +341,6 @@ st.html(
 </div>
 """
 )
-
 
 # =========================================================
 # HERO
@@ -371,7 +367,6 @@ st.html(
 """
 )
 
-
 # =========================================================
 # UPLOAD
 # =========================================================
@@ -395,7 +390,6 @@ uploaded_image = st.file_uploader(
     type=["jpg", "jpeg", "png"],
     label_visibility="collapsed",
 )
-
 
 # =========================================================
 # CUSTOMIZATION
@@ -434,7 +428,6 @@ with control_col2:
         index=0,
     )
 
-
 # =========================================================
 # STYLE PROMPTS
 # =========================================================
@@ -454,7 +447,6 @@ Do not add extra people or objects.
 Do not change the person's identity.
 Keep the original scene recognizable.
 """,
-
     "Watercolor": """
 Transform the supplied photograph into a beautiful hand-painted
 watercolor illustration.
@@ -468,7 +460,6 @@ elegant painted edges and subtle paper-like texture.
 Do not add extra people or objects.
 Keep the original scene recognizable.
 """,
-
     "Manga": """
 Transform the supplied photograph into a polished manga-style
 illustration.
@@ -481,7 +472,6 @@ detailed illustrated features and controlled highlights.
 
 Do not add extra people or objects.
 """,
-
     "Digital Art": """
 Transform the supplied photograph into polished professional
 digital artwork.
@@ -494,7 +484,6 @@ smooth digital painting and a premium illustration finish.
 
 Do not add extra people or objects.
 """,
-
     "Classic Cartoon": """
 Transform the supplied photograph into a colorful polished
 cartoon illustration.
@@ -506,9 +495,8 @@ Use bold clean outlines, smooth colors, playful shading,
 simplified but recognizable forms and a friendly animated finish.
 
 Do not add extra people or objects.
-"""
+""",
 }
-
 
 # =========================================================
 # IMAGE → DATA URI
@@ -517,56 +505,39 @@ Do not add extra people or objects.
 def image_to_data_uri(image):
     image = image.convert("RGB").copy()
 
-    image.thumbnail(
-        (1536, 1536),
-        Image.Resampling.LANCZOS
-    )
+    image.thumbnail((1536, 1536), Image.Resampling.LANCZOS)
 
     buffer = BytesIO()
 
-    image.save(
-        buffer,
-        format="JPEG",
-        quality=90,
-        optimize=True
-    )
+    image.save(buffer, format="JPEG", quality=90, optimize=True)
 
-    encoded = base64.b64encode(
-        buffer.getvalue()
-    ).decode("ascii")
+    encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
 
     return "data:image/jpeg;base64," + encoded
-
 
 # =========================================================
 # PUTER.JS EDITOR
 # =========================================================
 
 def render_puter_editor(image_data_uri, selected_style, quality):
-
     prompt = STYLE_PROMPTS[selected_style].strip()
     model = "black-forest-labs/flux-2-klein-4b"
     megapixels = "0.5" if quality == "Fast" else "1"
 
     # Escape values before inserting them into JavaScript.
     safe_prompt = (
-        prompt
-        .replace("\\", "\\\\")
+        prompt.replace("\\", "\\\\")
         .replace("`", "\\`")
         .replace("${", "\\${")
     )
 
     safe_image = (
-        image_data_uri
-        .replace("\\", "\\\\")
+        image_data_uri.replace("\\", "\\\\")
         .replace('"', '\\"')
     )
 
     safe_style = html.escape(selected_style)
 
-    # IMPORTANT:
-    # This is a normal raw Python string, NOT an f-string.
-    # Therefore JavaScript { } are completely safe.
     component_html = r"""
 <!DOCTYPE html>
 <html>
@@ -805,7 +776,6 @@ button:disabled {
 
 </div>
 
-
 <script>
 
 const SOURCE_IMAGE = "__IMAGE__";
@@ -813,25 +783,18 @@ const STYLE_PROMPT = `__PROMPT__`;
 const MODEL = "__MODEL__";
 const MEGAPIXELS = "__MEGAPIXELS__";
 
-
 function setStatus(message, type = "") {
-
     const element = document.getElementById("status");
-
     element.textContent = message;
     element.className = "status " + type;
 }
 
-
 function showResult(source, fallback = false) {
-
     const box = document.getElementById("resultBox");
-
     box.className = "";
     box.style.padding = "0";
 
     const image = document.createElement("img");
-
     image.className = "preview";
     image.src = source;
     image.alt = "Generated artwork";
@@ -839,160 +802,77 @@ function showResult(source, fallback = false) {
     box.innerHTML = "";
     box.appendChild(image);
 
-
     const download = document.getElementById("download");
-
     download.href = source;
     download.style.display = "flex";
 
-
     if (fallback) {
-
-        setStatus(
-            "Quick Cartoon is ready.",
-            "warning"
-        );
-
+        setStatus("Quick Cartoon is ready.", "warning");
     } else {
-
-        setStatus(
-            "✨ Your AI artwork is ready!",
-            "success"
-        );
-
+        setStatus("✨ Your AI artwork is ready!", "success");
     }
 }
 
-
 async function generateArtwork() {
-
     const button = document.getElementById("generate");
-
     button.disabled = true;
     button.textContent = "✨ Creating artwork...";
 
-    setStatus(
-        "Connecting to Puter and generating your artwork. Please wait..."
-    );
-
+    setStatus("Connecting to Puter and generating your artwork. Please wait...");
 
     try {
-
         const result = await puter.ai.txt2img(
             STYLE_PROMPT,
             {
                 model: MODEL,
-                input_images: [
-                    SOURCE_IMAGE
-                ],
+                input_images: [SOURCE_IMAGE],
                 output_megapixels: MEGAPIXELS
             }
         );
 
-
         if (!result || !result.src) {
-
-            throw new Error(
-                "Puter did not return an image."
-            );
+            throw new Error("Puter did not return an image.");
         }
 
-
         showResult(result.src, false);
-
-    }
-
-    catch(error) {
-
+    } catch(error) {
         console.error(error);
-
         setStatus(
             "AI generation could not be completed. You can use Quick Cartoon below.",
             "warning"
         );
-
-    }
-
-    finally {
-
+    } finally {
         button.disabled = false;
         button.textContent = "✨ Generate AI Artwork";
-
     }
 }
 
-
 function makeFallback() {
-
     const image = new Image();
 
-
     image.onload = function() {
-
         const maxSize = 1100;
-
         const scale = Math.min(
             1,
-            maxSize / Math.max(
-                image.width,
-                image.height
-            )
+            maxSize / Math.max(image.width, image.height)
         );
-
 
         const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
 
-        canvas.width = Math.max(
-            1,
-            Math.round(image.width * scale)
-        );
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-        canvas.height = Math.max(
-            1,
-            Math.round(image.height * scale)
-        );
-
-
-        const context = canvas.getContext(
-            "2d",
-            {
-                willReadFrequently: true
-            }
-        );
-
-
-        context.drawImage(
-            image,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-
-        const imageData = context.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
 
-
-        for (
-            let i = 0;
-            i < data.length;
-            i += 4
-        ) {
-
+        for (let i = 0; i < data.length; i += 4) {
             let r = data[i];
             let g = data[i + 1];
             let b = data[i + 2];
 
             const average = (r + g + b) / 3;
-
             r = r + (r - average) * 0.18;
             g = g + (g - average) * 0.18;
             b = b + (b - average) * 0.18;
@@ -1001,30 +881,15 @@ function makeFallback() {
             g = Math.round(g / 32) * 32;
             b = Math.round(b / 32) * 32;
 
-            data[i] =
-                Math.max(0, Math.min(255, r));
-
-            data[i + 1] =
-                Math.max(0, Math.min(255, g));
-
-            data[i + 2] =
-                Math.max(0, Math.min(255, b));
+            data[i] = Math.max(0, Math.min(255, r));
+            data[i + 1] = Math.max(0, Math.min(255, g));
+            data[i + 2] = Math.max(0, Math.min(255, b));
         }
 
-
-        context.putImageData(
-            imageData,
-            0,
-            0
-        );
-
-
+        context.putImageData(imageData, 0, 0);
         const source = canvas.toDataURL("image/png");
-
         showResult(source, true);
-
     };
-
 
     image.src = SOURCE_IMAGE;
 }
@@ -1044,27 +909,19 @@ function makeFallback() {
         .replace("__STYLE__", safe_style)
     )
 
-   st.iframe(
-    srcdoc=component_html,
-    height=820,
-    scrolling=False
-)
-
+    components.html(
+        component_html,
+        height=820,
+        scrolling=False,
+    )
 
 # =========================================================
 # RUN APP
 # =========================================================
 
 if uploaded_image is not None:
-
-    original_image = (
-        Image.open(uploaded_image)
-        .convert("RGB")
-    )
-
-    image_data_uri = image_to_data_uri(
-        original_image
-    )
+    original_image = Image.open(uploaded_image).convert("RGB")
+    image_data_uri = image_to_data_uri(original_image)
 
     st.html(
         """
@@ -1078,7 +935,7 @@ if uploaded_image is not None:
     render_puter_editor(
         image_data_uri=image_data_uri,
         selected_style=cartoon_style,
-        quality=output_quality
+        quality=output_quality,
     )
 
     st.caption(
@@ -1088,11 +945,9 @@ if uploaded_image is not None:
     )
 
 else:
-
     st.html(
         """
 <div class="empty-state">
-
     <div class="empty-icons">
         🌸 ✨ 🌙
     </div>
@@ -1101,11 +956,9 @@ else:
         Your canvas is waiting.
         Upload a photo above to begin.
     </div>
-
 </div>
 """
     )
-
 
 # =========================================================
 # FOOTER
@@ -1114,13 +967,9 @@ else:
 st.html(
     """
 <div class="footer">
-
     Made with <span>🌸</span> and a little bit of AI magic
-
     <br>
-
     Toonify AI · Image Art Studio
-
 </div>
 """
 )
