@@ -750,18 +750,18 @@ button:disabled {
 
     <div class="controls">
 
-        <button id="generate" onclick="generateArtwork()">
+        <button id="generate" type="button">
             ✨ Generate AI Artwork
         </button>
 
-        <button id="fallback" onclick="makeFallback()">
+        <button id="fallback" type="button">
             🎨 Quick Cartoon
         </button>
 
     </div>
 
     <div id="status" class="status">
-        AI generation runs through Puter.js.
+        AI generation runs through Puter.js. The first AI use may open a Puter sign-in popup.
         You may be asked to sign in to Puter the first time.
     </div>
 
@@ -815,31 +815,82 @@ function showResult(source, fallback = false) {
 async function generateArtwork() {
     const button = document.getElementById("generate");
     button.disabled = true;
-    button.textContent = "✨ Creating artwork...";
-
-    setStatus("Connecting to Puter and generating your artwork. Please wait...");
+    button.textContent = "✨ Preparing AI...";
 
     try {
-        const result = await puter.ai.txt2img(
-            STYLE_PROMPT,
-            {
-                model: MODEL,
-                input_images: [SOURCE_IMAGE],
-                output_megapixels: MEGAPIXELS
-            }
-        );
-
-        if (!result || !result.src) {
-            throw new Error("Puter did not return an image.");
+        if (typeof puter === "undefined") {
+            throw new Error("Puter.js did not load.");
         }
 
-        showResult(result.src, false);
-    } catch(error) {
-        console.error(error);
+        // Explicitly authenticate from this button click when needed.
+        // This keeps the popup tied to a real user action.
+        if (
+            puter.auth &&
+            typeof puter.auth.isSignedIn === "function" &&
+            !puter.auth.isSignedIn()
+        ) {
+            setStatus("Opening Puter sign-in. Please complete it and return here...");
+
+            if (typeof puter.auth.signIn !== "function") {
+                throw new Error("Puter sign-in is unavailable.");
+            }
+
+            const signInResult = await puter.auth.signIn();
+
+            if (signInResult && signInResult.success === false) {
+                throw new Error(
+                    signInResult.msg ||
+                    signInResult.error ||
+                    "Puter sign-in was not completed."
+                );
+            }
+        }
+
+        button.textContent = "✨ Creating artwork...";
         setStatus(
-            "AI generation could not be completed. You can use Quick Cartoon below.",
+            "Generating your artwork with Puter AI. This can take a little while..."
+        );
+
+        if (!puter.ai || typeof puter.ai.txt2img !== "function") {
+            throw new Error("Puter image generation is unavailable.");
+        }
+
+        const options = {
+            model: MODEL,
+            input_images: [SOURCE_IMAGE],
+            output_megapixels: MEGAPIXELS
+        };
+
+        const result = await puter.ai.txt2img(STYLE_PROMPT, options);
+
+        let resultSrc = null;
+
+        if (result && result.src) {
+            resultSrc = result.src;
+        } else if (typeof result === "string") {
+            resultSrc = result;
+        }
+
+        if (!resultSrc) {
+            throw new Error("Puter returned no image.");
+        }
+
+        showResult(resultSrc, false);
+
+    } catch (error) {
+        console.error("Toonify AI generation error:", error);
+
+        const message =
+            error && error.message
+                ? error.message
+                : "Unknown Puter error.";
+
+        setStatus(
+            "AI generation failed: " + message +
+            " You can still use Quick Cartoon.",
             "warning"
         );
+
     } finally {
         button.disabled = false;
         button.textContent = "✨ Generate AI Artwork";
@@ -847,115 +898,151 @@ async function generateArtwork() {
 }
 
 function makeFallback() {
+    const button = document.getElementById("fallback");
+    button.disabled = true;
+    button.textContent = "🎨 Creating cartoon...";
+
     const image = new Image();
 
     image.onload = function() {
-        const maxSize = 1100;
-        const scale = Math.min(
-            1,
-            maxSize / Math.max(image.width, image.height)
-        );
+        try {
+            const maxSize = 1000;
+            const scale = Math.min(
+                1,
+                maxSize / Math.max(image.width, image.height)
+            );
 
-        const width = Math.max(1, Math.round(image.width * scale));
-        const height = Math.max(1, Math.round(image.height * scale));
+            const width = Math.max(1, Math.round(image.width * scale));
+            const height = Math.max(1, Math.round(image.height * scale));
 
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
 
-        const context = canvas.getContext("2d", {
-            willReadFrequently: true
-        });
+            const ctx = canvas.getContext("2d", {
+                willReadFrequently: true
+            });
 
-        context.drawImage(image, 0, 0, width, height);
+            ctx.drawImage(image, 0, 0, width, height);
 
-        const imageData = context.getImageData(0, 0, width, height);
-        const data = imageData.data;
+            // First pass: simplify and saturate the colors.
+            const original = ctx.getImageData(0, 0, width, height);
+            const data = original.data;
 
-        // Make the colors visibly more cartoon-like.
-        for (let i = 0; i < data.length; i += 4) {
-            let r = data[i];
-            let g = data[i + 1];
-            let b = data[i + 2];
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i];
+                let g = data[i + 1];
+                let b = data[i + 2];
 
-            const avg = (r + g + b) / 3;
+                const avg = (r + g + b) / 3;
 
-            r = avg + (r - avg) * 1.28;
-            g = avg + (g - avg) * 1.28;
-            b = avg + (b - avg) * 1.28;
+                r = avg + (r - avg) * 1.35;
+                g = avg + (g - avg) * 1.35;
+                b = avg + (b - avg) * 1.35;
 
-            r = Math.round(r / 40) * 40;
-            g = Math.round(g / 40) * 40;
-            b = Math.round(b / 40) * 40;
+                // Five-to-seven broad color levels.
+                r = Math.round(r / 45) * 45;
+                g = Math.round(g / 45) * 45;
+                b = Math.round(b / 45) * 45;
 
-            data[i] = Math.max(0, Math.min(255, r));
-            data[i + 1] = Math.max(0, Math.min(255, g));
-            data[i + 2] = Math.max(0, Math.min(255, b));
-        }
-
-        context.putImageData(imageData, 0, 0);
-
-        // Add dark outlines using a simple Sobel edge detector.
-        const poster = context.getImageData(0, 0, width, height);
-        const pixels = poster.data;
-        const gray = new Float32Array(width * height);
-
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const p = (y * width + x) * 4;
-                gray[y * width + x] =
-                    0.299 * pixels[p] +
-                    0.587 * pixels[p + 1] +
-                    0.114 * pixels[p + 2];
+                data[i] = Math.max(0, Math.min(255, r));
+                data[i + 1] = Math.max(0, Math.min(255, g));
+                data[i + 2] = Math.max(0, Math.min(255, b));
             }
-        }
 
-        for (let y = 1; y < height - 1; y++) {
-            for (let x = 1; x < width - 1; x++) {
-                const idx = y * width + x;
+            ctx.putImageData(original, 0, 0);
 
-                const gx =
-                    -gray[idx - width - 1] +
-                    gray[idx - width + 1] -
-                    2 * gray[idx - 1] +
-                    2 * gray[idx + 1] -
-                    gray[idx + width - 1] +
-                    gray[idx + width + 1];
+            // Second pass: Sobel edge detection.
+            const img = ctx.getImageData(0, 0, width, height);
+            const pixels = img.data;
+            const gray = new Float32Array(width * height);
 
-                const gy =
-                    -gray[idx - width - 1] -
-                    2 * gray[idx - width] -
-                    gray[idx - width + 1] +
-                    gray[idx + width - 1] +
-                    2 * gray[idx + width] +
-                    gray[idx + width + 1];
-
-                const magnitude = Math.sqrt(gx * gx + gy * gy);
-
-                if (magnitude > 145) {
-                    const p = idx * 4;
-                    pixels[p] = Math.round(pixels[p] * 0.25);
-                    pixels[p + 1] = Math.round(pixels[p + 1] * 0.25);
-                    pixels[p + 2] = Math.round(pixels[p + 2] * 0.25);
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const p = (y * width + x) * 4;
+                    gray[y * width + x] =
+                        0.299 * pixels[p] +
+                        0.587 * pixels[p + 1] +
+                        0.114 * pixels[p + 2];
                 }
             }
+
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const i = y * width + x;
+
+                    const gx =
+                        -gray[i - width - 1] +
+                        gray[i - width + 1] -
+                        2 * gray[i - 1] +
+                        2 * gray[i + 1] -
+                        gray[i + width - 1] +
+                        gray[i + width + 1];
+
+                    const gy =
+                        -gray[i - width - 1] -
+                        2 * gray[i - width] -
+                        gray[i - width + 1] +
+                        gray[i + width - 1] +
+                        2 * gray[i + width] +
+                        gray[i + width + 1];
+
+                    const edge = Math.sqrt(gx * gx + gy * gy);
+
+                    if (edge > 120) {
+                        const p = i * 4;
+                        pixels[p] = Math.round(pixels[p] * 0.18);
+                        pixels[p + 1] = Math.round(pixels[p + 1] * 0.18);
+                        pixels[p + 2] = Math.round(pixels[p + 2] * 0.18);
+                    }
+                }
+            }
+
+            ctx.putImageData(img, 0, 0);
+
+            const result = canvas.toDataURL("image/png");
+            showResult(result, true);
+            setStatus(
+                "✨ Quick Cartoon is ready — generated locally in your browser.",
+                "success"
+            );
+
+        } catch (error) {
+            console.error("Quick Cartoon error:", error);
+            setStatus(
+                "Quick Cartoon failed: " +
+                (error.message || "Unknown browser error."),
+                "warning"
+            );
+        } finally {
+            button.disabled = false;
+            button.textContent = "🎨 Quick Cartoon";
         }
-
-        context.putImageData(poster, 0, 0);
-
-        const result = canvas.toDataURL("image/png");
-        showResult(result, true);
     };
 
     image.onerror = function() {
         setStatus(
-            "Quick Cartoon could not process this image.",
+            "Quick Cartoon could not read the uploaded image.",
             "warning"
         );
+        button.disabled = false;
+        button.textContent = "🎨 Quick Cartoon";
     };
 
     image.src = SOURCE_IMAGE;
 }
+
+    // Bind controls after all functions have been defined.
+    document.getElementById("generate").addEventListener(
+        "click",
+        generateArtwork
+    );
+
+    document.getElementById("fallback").addEventListener(
+        "click",
+        makeFallback
+    );
+
 
 </script>
 
@@ -972,9 +1059,9 @@ function makeFallback() {
         .replace("__STYLE__", safe_style)
     )
 
-    st.html(
+    st.iframe(
         component_html,
-        unsafe_allow_javascript=True,
+        height=820,
     )
 
 # =========================================================
