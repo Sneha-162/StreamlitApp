@@ -3,6 +3,7 @@ import html
 from io import BytesIO
 from PIL import Image
 import streamlit as st
+import streamlit.components.v1 as components
 
 # =========================================================
 # PAGE CONFIG
@@ -908,11 +909,21 @@ function makeFallback() {
         .replace("__STYLE__", safe_style)
     )
 
-    st.iframe(
-        html=component_html,
-        height=820,
-        scrolling=False,
-    )
+    b64_html = base64.b64encode(component_html.encode("utf-8")).decode("ascii")
+    data_url = f"data:text/html;charset=utf-8;base64,{b64_html}"
+
+    try:
+        st.iframe(
+            data_url,
+            height=820,
+            scrolling=False,
+        )
+    except Exception:
+        components.html(
+            component_html,
+            height=820,
+            scrolling=False,
+        )
 
 # =========================================================
 # RUN APP
