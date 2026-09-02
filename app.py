@@ -856,29 +856,37 @@ function makeFallback() {
             maxSize / Math.max(image.width, image.height)
         );
 
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+
         const canvas = document.createElement("canvas");
-        canvas.width = Math.max(1, Math.round(image.width * scale));
-        canvas.height = Math.max(1, Math.round(image.height * scale));
+        canvas.width = width;
+        canvas.height = height;
 
-        const context = canvas.getContext("2d", { willReadFrequently: true });
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        const context = canvas.getContext("2d", {
+            willReadFrequently: true
+        });
 
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, width, height);
+
+        const imageData = context.getImageData(0, 0, width, height);
         const data = imageData.data;
 
+        // Make the colors visibly more cartoon-like.
         for (let i = 0; i < data.length; i += 4) {
             let r = data[i];
             let g = data[i + 1];
             let b = data[i + 2];
 
-            const average = (r + g + b) / 3;
-            r = r + (r - average) * 0.18;
-            g = g + (g - average) * 0.18;
-            b = b + (b - average) * 0.18;
+            const avg = (r + g + b) / 3;
 
-            r = Math.round(r / 32) * 32;
-            g = Math.round(g / 32) * 32;
-            b = Math.round(b / 32) * 32;
+            r = avg + (r - avg) * 1.28;
+            g = avg + (g - avg) * 1.28;
+            b = avg + (b - avg) * 1.28;
+
+            r = Math.round(r / 40) * 40;
+            g = Math.round(g / 40) * 40;
+            b = Math.round(b / 40) * 40;
 
             data[i] = Math.max(0, Math.min(255, r));
             data[i + 1] = Math.max(0, Math.min(255, g));
@@ -886,8 +894,64 @@ function makeFallback() {
         }
 
         context.putImageData(imageData, 0, 0);
-        const source = canvas.toDataURL("image/png");
-        showResult(source, true);
+
+        // Add dark outlines using a simple Sobel edge detector.
+        const poster = context.getImageData(0, 0, width, height);
+        const pixels = poster.data;
+        const gray = new Float32Array(width * height);
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const p = (y * width + x) * 4;
+                gray[y * width + x] =
+                    0.299 * pixels[p] +
+                    0.587 * pixels[p + 1] +
+                    0.114 * pixels[p + 2];
+            }
+        }
+
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                const idx = y * width + x;
+
+                const gx =
+                    -gray[idx - width - 1] +
+                    gray[idx - width + 1] -
+                    2 * gray[idx - 1] +
+                    2 * gray[idx + 1] -
+                    gray[idx + width - 1] +
+                    gray[idx + width + 1];
+
+                const gy =
+                    -gray[idx - width - 1] -
+                    2 * gray[idx - width] -
+                    gray[idx - width + 1] +
+                    gray[idx + width - 1] +
+                    2 * gray[idx + width] +
+                    gray[idx + width + 1];
+
+                const magnitude = Math.sqrt(gx * gx + gy * gy);
+
+                if (magnitude > 145) {
+                    const p = idx * 4;
+                    pixels[p] = Math.round(pixels[p] * 0.25);
+                    pixels[p + 1] = Math.round(pixels[p + 1] * 0.25);
+                    pixels[p + 2] = Math.round(pixels[p + 2] * 0.25);
+                }
+            }
+        }
+
+        context.putImageData(poster, 0, 0);
+
+        const result = canvas.toDataURL("image/png");
+        showResult(result, true);
+    };
+
+    image.onerror = function() {
+        setStatus(
+            "Quick Cartoon could not process this image.",
+            "warning"
+        );
     };
 
     image.src = SOURCE_IMAGE;
@@ -908,9 +972,9 @@ function makeFallback() {
         .replace("__STYLE__", safe_style)
     )
 
-    st.iframe(
+    st.html(
         component_html,
-        height=820,
+        unsafe_allow_javascript=True,
     )
 
 # =========================================================
@@ -938,8 +1002,8 @@ if uploaded_image is not None:
 
     st.caption(
         "💡 Fast mode is recommended for a public demo. "
-        "If AI generation is unavailable, Quick Cartoon "
-        "works locally in the browser."
+        "AI generation may ask the visitor to sign in to Puter. "
+        "Quick Cartoon works locally in the browser."
     )
 
 else:
