@@ -3,7 +3,6 @@ import html
 from io import BytesIO
 from PIL import Image
 import streamlit as st
-import streamlit.components.v1 as components
 
 # =========================================================
 # PAGE CONFIG
@@ -909,8 +908,8 @@ function makeFallback() {
         .replace("__STYLE__", safe_style)
     )
 
-    components.html(
-        component_html,
+    st.iframe(
+        srcdoc=component_html,
         height=820,
         scrolling=False,
     )
