@@ -3,7 +3,7 @@ from io import BytesIO
 from PIL import Image
 import base64
 import html
-import streamlit.components.v1 as components
+
 
 
 # =========================================================
@@ -1044,11 +1044,11 @@ function makeFallback() {
         .replace("__STYLE__", safe_style)
     )
 
-    components.html(
-        component_html,
-        height=820,
-        scrolling=False
-    )
+   st.iframe(
+    srcdoc=component_html,
+    height=820,
+    scrolling=False
+)
 
 
 # =========================================================
