@@ -523,7 +523,7 @@ def render_puter_editor(image_data_uri, selected_style, quality):
     model = "black-forest-labs/flux-2-klein-4b"
     megapixels = "0.5" if quality == "Fast" else "1"
 
-    # Escape values before inserting them into JavaScript.
+    # Escape values before inserting them into JavaScript
     safe_prompt = (
         prompt.replace("\\", "\\\\")
         .replace("`", "\\`")
@@ -909,7 +909,7 @@ function makeFallback() {
     )
 
     st.iframe(
-        srcdoc=component_html,
+        html=component_html,
         height=820,
         scrolling=False,
     )
