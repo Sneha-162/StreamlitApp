@@ -34,11 +34,7 @@ st.html(
     color:#f7f5ff;
 }
 
-#MainMenu,
-header,
-footer {
-    visibility:hidden;
-}
+#MainMenu, header, footer { visibility:hidden; }
 
 [data-testid="stAppViewContainer"] {
     position:relative;
@@ -61,13 +57,9 @@ footer {
     top:8%;
     border-radius:50%;
     background:
-        radial-gradient(
-            circle at 35% 35%,
-            #ffffff 0%,
-            #eee8ff 35%,
-            #c9c2ff 65%,
-            rgba(180,160,255,.15) 100%
-        );
+        radial-gradient(circle at 35% 35%,
+            #ffffff 0%, #eee8ff 35%, #c9c2ff 65%,
+            rgba(180,160,255,.15) 100%);
     box-shadow:
         0 0 35px rgba(220,210,255,.55),
         0 0 100px rgba(160,130,255,.25);
@@ -91,14 +83,8 @@ footer {
 }
 
 @keyframes twinkle {
-    0%,100% {
-        opacity:.2;
-        transform:scale(.7);
-    }
-    50% {
-        opacity:1;
-        transform:scale(1.4);
-    }
+    0%,100% { opacity:.2; transform:scale(.7); }
+    50% { opacity:1; transform:scale(1.4); }
 }
 
 .petal {
@@ -117,15 +103,10 @@ footer {
         transform:translate3d(0,-12vh,0) rotate(0deg);
         opacity:0;
     }
-
-    10% {
-        opacity:.8;
-    }
-
+    10% { opacity:.8; }
     50% {
         transform:translate3d(100px,50vh,0) rotate(180deg);
     }
-
     100% {
         transform:translate3d(-120px,115vh,0) rotate(360deg);
         opacity:0;
@@ -154,9 +135,7 @@ footer {
     letter-spacing:-.5px;
 }
 
-.brand span {
-    color:#ff9ed8;
-}
+.brand span { color:#ff9ed8; }
 
 .brand-small {
     font-size:.78rem;
@@ -186,12 +165,7 @@ footer {
     margin:0;
     font-weight:900;
     letter-spacing:-2px;
-    background:linear-gradient(
-        100deg,
-        #fff 15%,
-        #ffd1ed 45%,
-        #bcb5ff 85%
-    );
+    background:linear-gradient(100deg,#fff 15%,#ffd1ed 45%,#bcb5ff 85%);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 }
@@ -242,24 +216,6 @@ footer {
     margin-bottom:18px;
 }
 
-.stButton > button {
-    width:100%;
-    min-height:48px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.10);
-    background:linear-gradient(135deg,#ff73c6,#a783ff);
-    color:#fff;
-    font-weight:800;
-    font-size:1rem;
-    box-shadow:0 10px 30px rgba(210,105,220,.25);
-    transition:all .2s ease;
-}
-
-.stButton > button:hover {
-    transform:translateY(-2px);
-    box-shadow:0 14px 38px rgba(210,105,220,.38);
-}
-
 [data-testid="stFileUploader"] {
     max-width:900px;
     margin:0 auto;
@@ -275,6 +231,24 @@ footer {
 [data-testid="stFileUploaderDropzone"]:hover {
     border-color:rgba(255,174,224,.75);
     background:rgba(30,26,67,.72);
+}
+
+.stButton > button {
+    width:100%;
+    min-height:48px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background:linear-gradient(135deg,#ff73c6,#a783ff);
+    color:white;
+    font-weight:800;
+    font-size:1rem;
+    box-shadow:0 10px 30px rgba(210,105,220,.25);
+    transition:all .2s ease;
+}
+
+.stButton > button:hover {
+    transform:translateY(-2px);
+    box-shadow:0 14px 38px rgba(210,105,220,.38);
 }
 
 .empty-state {
@@ -311,12 +285,9 @@ footer {
     font-size:.8rem;
 }
 
-.footer span {
-    color:#ff9ed8;
-}
+.footer span { color:#ff9ed8; }
 
 @media (max-width:700px) {
-
     .moon {
         width:100px;
         height:100px;
@@ -324,13 +295,8 @@ footer {
         top:5%;
     }
 
-    .hero {
-        padding-top:12px;
-    }
-
-    .hero h1 {
-        letter-spacing:-1px;
-    }
+    .hero { padding-top:12px; }
+    .hero h1 { letter-spacing:-1px; }
 
     .upload-card {
         padding:20px;
@@ -340,7 +306,6 @@ footer {
 </style>
 
 <div class="anime-bg">
-
     <div class="moon"></div>
 
     <div class="star" style="left:8%;top:18%;"></div>
@@ -360,7 +325,6 @@ footer {
     <div class="petal p6"></div>
     <div class="petal p7"></div>
     <div class="petal p8"></div>
-
 </div>
 """
 )
@@ -389,7 +353,6 @@ st.html(
 st.html(
     """
 <div class="hero">
-
     <div class="hero-badge">
         ✨ AI-powered image transformation
     </div>
@@ -404,7 +367,6 @@ st.html(
         manga, digital-art and classic-cartoon styles —
         right in your browser.
     </p>
-
 </div>
 """
 )
@@ -417,7 +379,6 @@ st.html(
 st.html(
     """
 <div class="upload-card">
-
     <div class="upload-title">
         🖼️ Start with an image
     </div>
@@ -425,7 +386,6 @@ st.html(
     <div class="upload-subtitle">
         Upload a JPG or PNG and let the magic begin ✨
     </div>
-
 </div>
 """
 )
@@ -456,7 +416,6 @@ st.html(
 control_col1, control_col2 = st.columns(2)
 
 with control_col1:
-
     cartoon_style = st.selectbox(
         "🎨 AI Art style",
         [
@@ -469,13 +428,9 @@ with control_col1:
     )
 
 with control_col2:
-
     output_quality = st.selectbox(
         "⚡ Generation quality",
-        [
-            "Fast",
-            "High quality",
-        ],
+        ["Fast", "High quality"],
         index=0,
     )
 
@@ -485,7 +440,6 @@ with control_col2:
 # =========================================================
 
 STYLE_PROMPTS = {
-
     "Anime Cartoon": """
 Transform the supplied photograph into a polished anime-inspired
 cartoon illustration.
@@ -561,11 +515,8 @@ Do not add extra people or objects.
 # =========================================================
 
 def image_to_data_uri(image):
-
     image = image.convert("RGB").copy()
 
-    # Important for mobile photos:
-    # don't send enormous 4000–8000px images to the browser AI.
     image.thumbnail(
         (1536, 1536),
         Image.Resampling.LANCZOS
@@ -584,97 +535,78 @@ def image_to_data_uri(image):
         buffer.getvalue()
     ).decode("ascii")
 
-    return f"data:image/jpeg;base64,{encoded}"
+    return "data:image/jpeg;base64," + encoded
 
 
 # =========================================================
 # PUTER.JS EDITOR
 # =========================================================
 
-def render_puter_editor(
-    image_data_uri,
-    selected_style,
-    quality
-):
+def render_puter_editor(image_data_uri, selected_style, quality):
 
     prompt = STYLE_PROMPTS[selected_style].strip()
-
-    # Puter currently supports FLUX.2 Klein image editing.
     model = "black-forest-labs/flux-2-klein-4b"
+    megapixels = "0.5" if quality == "Fast" else "1"
 
-    if quality == "Fast":
-        megapixels = "0.5"
-    else:
-        megapixels = "1"
-
+    # Escape values before inserting them into JavaScript.
     safe_prompt = (
         prompt
         .replace("\\", "\\\\")
         .replace("`", "\\`")
+        .replace("${", "\\${")
     )
 
     safe_image = (
         image_data_uri
         .replace("\\", "\\\\")
-        .replace("'", "\\'")
+        .replace('"', '\\"')
     )
 
     safe_style = html.escape(selected_style)
 
-    component_html = f"""
+    # IMPORTANT:
+    # This is a normal raw Python string, NOT an f-string.
+    # Therefore JavaScript { } are completely safe.
+    component_html = r"""
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://js.puter.com/v2/"></script>
 
 <style>
+* { box-sizing:border-box; }
 
-* {{
-    box-sizing:border-box;
-}}
-
-body {{
+body {
     margin:0;
     padding:4px;
-    font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     background:transparent;
     color:#f7f5ff;
-}}
+}
 
-.panel {{
+.panel {
     padding:18px;
     border-radius:22px;
     background:rgba(20,21,55,.72);
     border:1px solid rgba(255,255,255,.10);
     box-shadow:0 20px 55px rgba(0,0,0,.24);
-}}
+}
 
-.top {{
+.top {
     display:flex;
     justify-content:space-between;
     align-items:center;
     gap:12px;
     margin-bottom:16px;
-}}
+}
 
-.title {{
+.title {
     font-size:1.05rem;
     font-weight:800;
-}}
+}
 
-.badge {{
+.badge {
     padding:6px 10px;
     border-radius:999px;
     background:rgba(255,159,216,.10);
@@ -682,39 +614,39 @@ body {{
     color:#ffb6e5;
     font-size:.75rem;
     white-space:nowrap;
-}}
+}
 
-.images {{
+.images {
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:14px;
-}}
+}
 
-.card {{
+.card {
     background:rgba(9,11,34,.68);
     border:1px solid rgba(255,255,255,.08);
     border-radius:18px;
     padding:10px;
     overflow:hidden;
-}}
+}
 
-.label {{
+.label {
     text-align:center;
     font-size:.82rem;
     font-weight:750;
     padding:7px;
-}}
+}
 
-.preview {{
+.preview {
     width:100%;
     max-height:520px;
     object-fit:contain;
     display:block;
     border-radius:13px;
     background:rgba(255,255,255,.03);
-}}
+}
 
-.result-empty {{
+.result-empty {
     min-height:280px;
     display:flex;
     align-items:center;
@@ -722,17 +654,17 @@ body {{
     text-align:center;
     color:#9290ad;
     padding:20px;
-}}
+}
 
-.controls {{
+.controls {
     margin-top:15px;
     display:flex;
     gap:10px;
     flex-wrap:wrap;
-}}
+}
 
 button,
-.download {{
+.download {
     border:0;
     border-radius:13px;
     min-height:46px;
@@ -744,42 +676,35 @@ button,
     align-items:center;
     justify-content:center;
     font-size:.92rem;
-}}
+}
 
-#generate {{
+#generate {
     flex:1;
     color:white;
-    background:
-        linear-gradient(
-            135deg,
-            #ff73c6,
-            #a783ff
-        );
-    box-shadow:
-        0 10px 25px
-        rgba(210,105,220,.25);
-}}
+    background:linear-gradient(135deg,#ff73c6,#a783ff);
+    box-shadow:0 10px 25px rgba(210,105,220,.25);
+}
 
-#fallback {{
+#fallback {
     color:#eeeaff;
     background:rgba(255,255,255,.07);
     border:1px solid rgba(255,255,255,.10);
-}}
+}
 
-.download {{
+.download {
     width:100%;
     margin-top:10px;
     color:#f5f3ff;
     background:rgba(255,255,255,.07);
     border:1px solid rgba(255,255,255,.12);
-}}
+}
 
-button:disabled {{
+button:disabled {
     opacity:.55;
     cursor:wait;
-}}
+}
 
-.status {{
+.status {
     margin-top:12px;
     padding:11px 13px;
     border-radius:12px;
@@ -788,140 +713,93 @@ button:disabled {{
     font-size:.82rem;
     line-height:1.5;
     text-align:center;
-}}
+}
 
-.success {{
+.success {
     color:#9ef0c9;
     background:rgba(75,220,160,.08);
     border:1px solid rgba(75,220,160,.16);
-}}
+}
 
-.warning {{
+.warning {
     color:#ffd58f;
     background:rgba(255,190,80,.08);
     border:1px solid rgba(255,190,80,.16);
-}}
+}
 
-@media(max-width:700px) {{
+@media(max-width:700px) {
+    .images { grid-template-columns:1fr; }
 
-    .images {{
-        grid-template-columns:1fr;
-    }}
-
-    .top {{
+    .top {
         align-items:flex-start;
         flex-direction:column;
-    }}
+    }
 
-    .result-empty {{
-        min-height:180px;
-    }}
+    .result-empty { min-height:180px; }
 
-    .controls {{
-        flex-direction:column;
-    }}
+    .controls { flex-direction:column; }
 
-    button {{
-        width:100%;
-    }}
-
-}}
-
+    button { width:100%; }
+}
 </style>
-
 </head>
-
 
 <body>
 
 <div class="panel">
 
     <div class="top">
-
-        <div class="title">
-            🎨 {safe_style}
-        </div>
+        <div class="title">🎨 __STYLE__</div>
 
         <div class="badge">
             Puter.js · FLUX.2 Klein
         </div>
-
     </div>
-
 
     <div class="images">
 
         <div class="card">
-
-            <div class="label">
-                📸 Original
-            </div>
+            <div class="label">📸 Original</div>
 
             <img
                 id="original"
                 class="preview"
-                src="{safe_image}"
-                alt="Original image"
-            >
-
+                src="__IMAGE__"
+                alt="Original image">
         </div>
 
-
         <div class="card">
+            <div class="label">✨ AI Artwork</div>
 
-            <div class="label">
-                ✨ AI Artwork
+            <div id="resultBox" class="result-empty">
+                Your transformed image will appear here.
             </div>
-
-            <div
-                id="resultBox"
-                class="result-empty"
-            >
-                Your transformed image
-                will appear here.
-            </div>
-
         </div>
 
     </div>
 
-
     <div class="controls">
 
-        <button
-            id="generate"
-            onclick="generateArtwork()"
-        >
+        <button id="generate" onclick="generateArtwork()">
             ✨ Generate AI Artwork
         </button>
 
-        <button
-            id="fallback"
-            onclick="makeFallback()"
-        >
+        <button id="fallback" onclick="makeFallback()">
             🎨 Quick Cartoon
         </button>
 
     </div>
 
-
-    <div
-        id="status"
-        class="status"
-    >
-        AI generation runs in your browser
-        through Puter.js.
-        You may be asked to sign in to Puter
-        the first time.
+    <div id="status" class="status">
+        AI generation runs through Puter.js.
+        You may be asked to sign in to Puter the first time.
     </div>
-
 
     <a
         id="download"
         class="download"
         style="display:none"
-        download="toonify_artwork.png"
-    >
+        download="toonify_artwork.png">
         ⬇️ Download Artwork
     </a>
 
@@ -930,237 +808,157 @@ button:disabled {{
 
 <script>
 
-const SOURCE_IMAGE = '{safe_image}';
-
-const STYLE_PROMPT = `{safe_prompt}`;
-
-const MODEL = '{model}';
-
-const MEGAPIXELS = '{megapixels}';
+const SOURCE_IMAGE = "__IMAGE__";
+const STYLE_PROMPT = `__PROMPT__`;
+const MODEL = "__MODEL__";
+const MEGAPIXELS = "__MEGAPIXELS__";
 
 
-function setStatus(
-    message,
-    type = ""
-) {{
+function setStatus(message, type = "") {
 
-    const element =
-        document.getElementById("status");
+    const element = document.getElementById("status");
 
     element.textContent = message;
-
-    element.className =
-        "status " + type;
-}}
+    element.className = "status " + type;
+}
 
 
-function showResult(
-    source,
-    fallback = false
-) {{
+function showResult(source, fallback = false) {
 
-    const box =
-        document.getElementById("resultBox");
+    const box = document.getElementById("resultBox");
 
     box.className = "";
-
     box.style.padding = "0";
 
-    const image =
-        document.createElement("img");
+    const image = document.createElement("img");
 
     image.className = "preview";
-
     image.src = source;
-
     image.alt = "Generated artwork";
 
     box.innerHTML = "";
-
     box.appendChild(image);
 
 
-    const download =
-        document.getElementById("download");
+    const download = document.getElementById("download");
 
     download.href = source;
-
     download.style.display = "flex";
 
 
-    if (fallback) {{
+    if (fallback) {
 
         setStatus(
             "Quick Cartoon is ready.",
             "warning"
         );
 
-    }} else {{
+    } else {
 
         setStatus(
             "✨ Your AI artwork is ready!",
             "success"
         );
 
-    }}
+    }
+}
 
-}}
 
+async function generateArtwork() {
 
-async function generateArtwork() {{
-
-    const button =
-        document.getElementById("generate");
+    const button = document.getElementById("generate");
 
     button.disabled = true;
-
-    button.textContent =
-        "✨ Creating artwork...";
-
+    button.textContent = "✨ Creating artwork...";
 
     setStatus(
         "Connecting to Puter and generating your artwork. Please wait..."
     );
 
 
-    try {{
+    try {
 
-        const result =
-            await puter.ai.txt2img({{
-
-                prompt: STYLE_PROMPT,
-
+        const result = await puter.ai.txt2img(
+            STYLE_PROMPT,
+            {
                 model: MODEL,
-
                 input_images: [
                     SOURCE_IMAGE
                 ],
-
-                output_megapixels:
-                    MEGAPIXELS
-
-            }});
-
-
-        let source = null;
-
-
-        if (
-            result instanceof HTMLImageElement
-        ) {{
-
-            source = result.src;
-
-        }}
-
-        else if (
-            result &&
-            result.src
-        ) {{
-
-            source = result.src;
-
-        }}
-
-        else if (
-            result &&
-            result.image_url
-        ) {{
-
-            source = result.image_url;
-
-        }}
-
-
-        if (!source) {{
-
-            throw new Error(
-                "Puter returned an unexpected image format."
-            );
-
-        }}
-
-
-        showResult(
-            source,
-            false
+                output_megapixels: MEGAPIXELS
+            }
         );
 
-    }}
 
-    catch(error) {{
+        if (!result || !result.src) {
+
+            throw new Error(
+                "Puter did not return an image."
+            );
+        }
+
+
+        showResult(result.src, false);
+
+    }
+
+    catch(error) {
 
         console.error(error);
 
         setStatus(
-            "AI generation could not be completed. Use Quick Cartoon below as a reliable fallback.",
+            "AI generation could not be completed. You can use Quick Cartoon below.",
             "warning"
         );
 
-    }}
+    }
 
-    finally {{
+    finally {
 
         button.disabled = false;
+        button.textContent = "✨ Generate AI Artwork";
 
-        button.textContent =
-            "✨ Generate AI Artwork";
-
-    }}
-
-}}
+    }
+}
 
 
-function makeFallback() {{
+function makeFallback() {
 
-    const image =
-        new Image();
+    const image = new Image();
 
 
-    image.onload = function() {{
+    image.onload = function() {
 
         const maxSize = 1100;
 
-        const scale =
-            Math.min(
-                1,
-                maxSize /
-                Math.max(
-                    image.width,
-                    image.height
-                )
-            );
+        const scale = Math.min(
+            1,
+            maxSize / Math.max(
+                image.width,
+                image.height
+            )
+        );
 
 
-        const canvas =
-            document.createElement("canvas");
+        const canvas = document.createElement("canvas");
+
+        canvas.width = Math.max(
+            1,
+            Math.round(image.width * scale)
+        );
+
+        canvas.height = Math.max(
+            1,
+            Math.round(image.height * scale)
+        );
 
 
-        canvas.width =
-            Math.max(
-                1,
-                Math.round(
-                    image.width * scale
-                )
-            );
-
-
-        canvas.height =
-            Math.max(
-                1,
-                Math.round(
-                    image.height * scale
-                )
-            );
-
-
-        const context =
-            canvas.getContext(
-                "2d",
-                {{
-                    willReadFrequently:true
-                }}
-            );
+        const context = canvas.getContext(
+            "2d",
+            {
+                willReadFrequently: true
+            }
+        );
 
 
         context.drawImage(
@@ -1172,83 +970,46 @@ function makeFallback() {{
         );
 
 
-        const imageData =
-            context.getImageData(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
+        const imageData = context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
 
 
-        const data =
-            imageData.data;
+        const data = imageData.data;
 
-
-        // Lightweight local cartoon effect.
-        // No API call.
-        // No server memory.
-        // No AI credits.
 
         for (
             let i = 0;
             i < data.length;
             i += 4
-        ) {{
+        ) {
 
             let r = data[i];
-
             let g = data[i + 1];
-
             let b = data[i + 2];
 
+            const average = (r + g + b) / 3;
 
-            const average =
-                (r + g + b) / 3;
+            r = r + (r - average) * 0.18;
+            g = g + (g - average) * 0.18;
+            b = b + (b - average) * 0.18;
 
-
-            r =
-                r +
-                (r - average) * 0.18;
-
-            g =
-                g +
-                (g - average) * 0.18;
-
-            b =
-                b +
-                (b - average) * 0.18;
-
-
-            r =
-                Math.round(r / 32) * 32;
-
-            g =
-                Math.round(g / 32) * 32;
-
-            b =
-                Math.round(b / 32) * 32;
-
+            r = Math.round(r / 32) * 32;
+            g = Math.round(g / 32) * 32;
+            b = Math.round(b / 32) * 32;
 
             data[i] =
-                Math.max(
-                    0,
-                    Math.min(255,r)
-                );
+                Math.max(0, Math.min(255, r));
 
             data[i + 1] =
-                Math.max(
-                    0,
-                    Math.min(255,g)
-                );
+                Math.max(0, Math.min(255, g));
 
             data[i + 2] =
-                Math.max(
-                    0,
-                    Math.min(255,b)
-                );
-
-        }}
+                Math.max(0, Math.min(255, b));
+        }
 
 
         context.putImageData(
@@ -1258,31 +1019,30 @@ function makeFallback() {{
         );
 
 
-        const source =
-            canvas.toDataURL(
-                "image/png"
-            );
+        const source = canvas.toDataURL("image/png");
 
-
-        showResult(
-            source,
-            true
-        );
+        showResult(source, true);
 
     };
 
 
-    image.src =
-        SOURCE_IMAGE;
-
-}}
+    image.src = SOURCE_IMAGE;
+}
 
 </script>
 
 </body>
-
 </html>
 """
+
+    component_html = (
+        component_html
+        .replace("__IMAGE__", safe_image)
+        .replace("__PROMPT__", safe_prompt)
+        .replace("__MODEL__", model)
+        .replace("__MEGAPIXELS__", megapixels)
+        .replace("__STYLE__", safe_style)
+    )
 
     components.html(
         component_html,
@@ -1292,7 +1052,7 @@ function makeFallback() {{
 
 
 # =========================================================
-# RUN
+# RUN APP
 # =========================================================
 
 if uploaded_image is not None:
@@ -1306,7 +1066,6 @@ if uploaded_image is not None:
         original_image
     )
 
-
     st.html(
         """
 <div class="success-card">
@@ -1316,20 +1075,17 @@ if uploaded_image is not None:
 """
     )
 
-
     render_puter_editor(
         image_data_uri=image_data_uri,
         selected_style=cartoon_style,
         quality=output_quality
     )
 
-
     st.caption(
         "💡 Fast mode is recommended for a public demo. "
         "If AI generation is unavailable, Quick Cartoon "
         "works locally in the browser."
     )
-
 
 else:
 
@@ -1359,9 +1115,7 @@ st.html(
     """
 <div class="footer">
 
-    Made with
-    <span>🌸</span>
-    and a little bit of AI magic
+    Made with <span>🌸</span> and a little bit of AI magic
 
     <br>
 
